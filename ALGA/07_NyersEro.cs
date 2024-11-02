@@ -8,7 +8,7 @@ namespace OE.ALGA.Optimalizalas
 {
    public class HatizsakProblemak
     {
-        public int n { get; }
+        internal int n { get; }
         public int Wmax { get; }
         public int[] w { get; }
         public int[] p { get; }
