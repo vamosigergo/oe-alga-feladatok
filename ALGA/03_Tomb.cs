@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OE.ALGA.Adatszerkezetek
 {
-    public class TömbVerem<T> : Verem<T>
+    public class TombVerem<T> : Verem<T>
     {
-         T[] E;
-         int n;
-
+        public T[] E;
+        public int n = 0;
         public bool Ures
         {
             get
@@ -20,10 +19,22 @@ namespace OE.ALGA.Adatszerkezetek
                 return n == 0;
             }
         }
-        public TömbVerem(int meret)
+
+        public TombVerem(int meret)
         {
             E = new T[meret];
-             
+        }
+
+        public T Felso()
+        {
+            if (!Ures)
+            {
+                return E[n - 1];
+            }
+            else
+            {
+                throw new NincsElemKivetel();
+            }
         }
 
         public void Verembe(T ertek)
@@ -37,29 +48,15 @@ namespace OE.ALGA.Adatszerkezetek
             {
                 throw new NincsHelyKivetel();
             }
-            
         }
 
         public T Verembol()
         {
             if (n > 0)
             {
-               T ertek = E[n-1];
+                T ertek = E[n - 1];
                 n--;
                 return ertek;
-            }
-            else
-            {
-                throw new NincsElemKivetel();
-            }
-            
-        }
-
-        public T Felso()
-        {
-            if (!Ures)
-            {
-                return E[n-1];
             }
             else
             {
@@ -70,16 +67,11 @@ namespace OE.ALGA.Adatszerkezetek
 
     public class TombSor<T> : Sor<T>
     {
-        T[] E;
-        int n;
-        int e;
-        int u;
+        public T[] E;
+        public int n; 
+        public int e; 
+        public int u; 
 
-        public TombSor(int meret)
-        {
-            E = new T[meret];
-        }
-        
         public bool Ures
         {
             get
@@ -87,12 +79,17 @@ namespace OE.ALGA.Adatszerkezetek
                 return n == 0;
             }
         }
+        public TombSor(int meret)
+        {
+            E = new T[meret];
+            n = e = u = 0;
+        }
 
         public T Elso()
         {
             if (!Ures)
             {
-                return E[n - 1];
+                return E[e];
             }
             else
             {
@@ -102,11 +99,11 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Sorba(T ertek)
         {
-            if(n < E.Length)
+            if (n < E.Length)
             {
-                n++;
-                u = u % E.Length + 1;
                 E[u] = ertek;
+                u = (u + 1) % E.Length;
+                n++;
             }
             else
             {
@@ -116,11 +113,11 @@ namespace OE.ALGA.Adatszerkezetek
 
         public T Sorbol()
         {
-           if (n > 0)
+            if (!Ures)
             {
-                n--;
-                e = e % E.Length + 1;
                 T ertek = E[e];
+                e = (e + 1) % E.Length;
+                n--;
                 return ertek;
             }
             else
@@ -132,9 +129,9 @@ namespace OE.ALGA.Adatszerkezetek
 
     public class TombLista<T> : Lista<T>, IEnumerable<T>
     {
-        T[] E;
-        int n;
-        
+        public T[] E;
+        public int n;
+
         public int Elemszam
         {
             get
@@ -143,21 +140,19 @@ namespace OE.ALGA.Adatszerkezetek
             }
         }
 
-        public TombLista(int meret)
+        public TombLista(int meret = 2)
         {
             E = new T[meret];
+            n = 0;
         }
-
-        public void MeretNovel()
+        public void Novel()
         {
-            T[] É = E;
-            E = new T[E.Length * 2];
-
-            for (int i = 0; i < n; i++)
+            T[] E2 = E;
+            E = new T[E2.Length * 2];
+            for (int i = 0; i < E2.Length; i++)
             {
-                E[i] = É[i];
+                E[i] = E2[i];
             }
-            É = null;
         }
 
         public void Bejar(Action<T> muvelet)
@@ -170,18 +165,18 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Beszur(int index, T ertek)
         {
-            if(index <= n + 1)
+            if (index <= E.Length && index >= 0)
             {
-                n++;
-                for (int i = 0; i < index; i++)
+                if (n >= E.Length)
+                {
+                    Novel();
+                }
+                for (int i = n; i > index; i--)
                 {
                     E[i] = E[i - 1];
                 }
                 E[index] = ertek;
-            }
-            else if (n == E.Length)
-            {
-                MeretNovel();
+                n++;
             }
             else
             {
@@ -191,12 +186,12 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Hozzafuz(T ertek)
         {
-            Beszur(n + 1, ertek);
+            Beszur(n, ertek);
         }
 
         public T Kiolvas(int index)
         {
-            if(index <= n)
+            if (index < n)
             {
                 return E[index];
             }
@@ -208,7 +203,7 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Modosit(int index, T ertek)
         {
-            if(index <= n)
+            if (index < n)
             {
                 E[index] = ertek;
             }
@@ -232,13 +227,12 @@ namespace OE.ALGA.Adatszerkezetek
                     E[i - db] = E[i];
                 }
             }
-            n = n - db;
+            n -= db;
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            TombListaBejaro<T> bejaro = new TombListaBejaro<T>(E, n);
-            return bejaro;
+            return new TombListaBejaro<T>(E, n);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -249,47 +243,41 @@ namespace OE.ALGA.Adatszerkezetek
 
     public class TombListaBejaro<T> : IEnumerator<T>
     {
-        T[] E;
-        int n;
-        int AktualisIndex = -1;
+        public T[] E;
+        public int n;
+        public int aktualisIndex = -1;
+        public T aktualis;
 
         public TombListaBejaro(T[] E, int n)
         {
             this.E = E;
             this.n = n;
         }
-        
-        public T Current
-        {
-            get
-            {
-                return E[AktualisIndex];
-            }
-        }
 
-        object IEnumerator.Current => throw new NotImplementedException();
+        public T Current => E[aktualisIndex];
+
+        object IEnumerator.Current => aktualis;
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public bool MoveNext()
         {
-            if(AktualisIndex < n)
+            if (aktualisIndex < n - 1)
             {
-                AktualisIndex++;
+                aktualisIndex++;
                 return true;
             }
             else
             {
-                return false;   
+                return false;
             }
         }
 
         public void Reset()
         {
-            AktualisIndex--;
+            aktualisIndex = -1;
         }
     }
 }
