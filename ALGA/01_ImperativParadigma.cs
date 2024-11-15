@@ -7,16 +7,77 @@ using System.Threading.Tasks;
 
 namespace OE.ALGA.Paradigmak
 {
+    public interface IFuggo
+    {
+        public bool FuggosegTeljesul { get; }
+    }
     public interface IVegrehajthato
     {
         void Vegrehajtas();
     }
 
-    public interface IFuggo
+    public class FuggoFeladatTarolo<T> : FeladatTarolo<T> where T : IVegrehajthato, IFuggo
     {
-        bool FuggosegTeljesul { get; }
+        public FuggoFeladatTarolo(int meret) : base(meret)
+        {
+        }
+        public override void MindentVegrehajt()
+        {
+            for (int i = 0; i < n; i++)
+            {
+                if (tarolo[i].FuggosegTeljesul)
+                {
+                    tarolo[i].Vegrehajtas();
+                }
+            }
+        }
+
     }
 
+    public class FeladatTaroloBejaro<T> : IEnumerator<T>
+    {
+        T[] tarolo;
+        int n;
+        int aktualisindex = -1;
+        public FeladatTaroloBejaro(T[] tarolo, int n)
+        {
+            this.tarolo = tarolo;
+            this.n = n;
+        }
+
+        public T Current
+        {
+            get
+            {
+                return tarolo[aktualisindex];
+            }
+        }
+
+        object IEnumerator.Current => Current;
+
+        public void Dispose()
+        {
+
+        }
+
+        public bool MoveNext()
+        {
+            if (aktualisindex < n - 1)
+            {
+                aktualisindex++;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Reset()
+        {
+            aktualisindex = -1;
+        }
+    }
 
     public class FeladatTarolo<T> : IEnumerable<T> where T : IVegrehajthato
     {
@@ -25,10 +86,7 @@ namespace OE.ALGA.Paradigmak
         public FeladatTarolo(int meret)
         {
             tarolo = new T[meret];
-            n++;
-
         }
-
         public void Felvesz(T elem)
         {
             if (n < tarolo.Length)
@@ -39,12 +97,13 @@ namespace OE.ALGA.Paradigmak
             else
             {
                 throw new TaroloMegteltKivetel();
+
             }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            return new FeladatTaroloBejaro<T>(tarolo, n);
         }
 
         public virtual void MindentVegrehajt()
@@ -57,84 +116,13 @@ namespace OE.ALGA.Paradigmak
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            TaroloBejaro<T> bejaro = new TaroloBejaro<T>(tarolo, n);
-            return bejaro;
-        }
-    }
-
-    public class FuggoFeladatTarolo<T> : FeladatTarolo<T> where T : IVegrehajthato, IFuggo
-    {
-        public FuggoFeladatTarolo(int meret) : base(meret)
-        {
-        }
-
-        public override void MindentVegrehajt()
-        {
-            for (int i = 0; i < n; i++)
-            {
-
-                if (tarolo[i].FuggosegTeljesul)
-                {
-                    tarolo[i].Vegrehajtas();
-                }
-            }
-        }
-    }
-
-    public class TaroloBejaro<T> : IEnumerator<T>
-    {
-        T[] E;
-        int n;
-        int AktualisIndex = -1;
-
-        public TaroloBejaro(T[] E, int n)
-        {
-            this.E = E;
-            this.n = n;
-        }
-
-        public T Current
-        {
-
-            get { return E[AktualisIndex]; } 
-        }
-
-        object IEnumerator.Current => throw new NotImplementedException();
-
-        public void Dispose()
-        {
             throw new NotImplementedException();
         }
-
-        public bool MoveNext()
-        {
-            if(AktualisIndex < n-1)
-            {
-                AktualisIndex++;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public void Reset()
-        {
-            AktualisIndex = -1;
-        }
     }
 
-    
-
-    public class TaroloMegteltKivetel() : Exception
+    public class TaroloMegteltKivetel : Exception
     {
 
     }
-
-
-
-
-
-
 }
+
