@@ -2,49 +2,41 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OE.ALGA.Adatszerkezetek
 {
-    internal class LancElem<T>
+    public class LancElem<T> 
     {
         public T tart;
         public LancElem<T>? kov;
+
         public LancElem(T tart, LancElem<T>? kov)
         {
             this.tart = tart;
             this.kov = kov;
         }
-
-
     }
-
     public class LancoltVerem<T> : Verem<T>
     {
-        LancElem<T>? fej;
+        public LancElem<T>? fej;
+
         public LancoltVerem()
         {
             fej = null;
         }
-        public bool Ures
-        {
-            get
-            {
-                return fej == null;
-            }
-        }
+
+        public bool Ures => fej == null;
 
         public T Felso()
         {
-           if(fej != null)
-            {
-                return fej.tart;
-            }
-            else
+            if (fej == null)
             {
                 throw new NincsElemKivetel();
             }
+            return fej.tart;
         }
 
         public void Verembe(T ertek)
@@ -55,49 +47,41 @@ namespace OE.ALGA.Adatszerkezetek
 
         public T Verembol()
         {
-            if(fej != null)
-            {
-                T ertek = fej.tart;
-                fej = fej.kov;
-                return ertek;
-            }
-            else
+            if (fej == null)
             {
                 throw new NincsElemKivetel();
             }
+            T ertek = fej.tart;
+            fej = fej.kov;
+            return ertek;
+
         }
     }
-
     public class LancoltSor<T> : Sor<T>
     {
-        LancElem<T>? fej;
-        LancElem<T>? vege;
-
-        public bool Ures
+        public LancElem<T>? fej;
+        public LancElem<T>? vege;
+        public LancoltSor()
         {
-            get
-            {
-                return fej == null;
-               
-            }
+            fej = null;
         }
+
+
+        public bool Ures => fej == null;
 
         public T Elso()
         {
-           if(fej != null)
-           {
-                return fej.tart;
-           }
-            else
+            if (fej == null)
             {
                 throw new NincsElemKivetel();
             }
+            return fej.tart;
         }
 
         public void Sorba(T ertek)
         {
             LancElem<T> uj = new LancElem<T>(ertek, null);
-            if(vege != null)
+            if (vege != null)
             {
                 vege.kov = uj;
             }
@@ -105,58 +89,54 @@ namespace OE.ALGA.Adatszerkezetek
             {
                 fej = uj;
             }
-
             vege = uj;
         }
 
         public T Sorbol()
         {
-           if(fej != null)
-           {
+            if (fej != null)
+            {
                 T ertek = fej.tart;
-                LancElem<T>? q;
-                q = fej;
                 fej = fej.kov;
-                if(fej == null)
+                if (fej == null)
                 {
                     vege = null;
                 }
                 return ertek;
-           }
-
-           else
-           {
+            }
+            else
+            {
                 throw new NincsElemKivetel();
-           }
+            }
         }
     }
-
     public class LancoltLista<T> : Lista<T>, IEnumerable<T>
     {
-        LancElem<T>? fej;
-        LancElem<T>? p;
-        LancElem<T>? e;
-        LancElem<T>? q;
+        public LancElem<T>? fej;
+        public LancoltLista()
+        {
+            fej = null;
+        }
 
         public int Elemszam
         {
             get
             {
-                int count = 0;
-                var current = fej;
-                while(current != null)
+                LancElem<T> p = fej;
+                int n = 0;
+                while (p != null)
                 {
-                    count++;
-                    current = current.kov;
+                    p = p.kov;
+                    n++;
                 }
-                return count;
+                return n;
             }
         }
 
         public void Bejar(Action<T> muvelet)
         {
-            p = fej;
-            while(p != null)
+            LancElem<T> p = fej;
+            while (p != null)
             {
                 muvelet(p.tart);
                 p = p.kov;
@@ -165,7 +145,6 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Beszur(int index, T ertek)
         {
-           
             if (fej == null || index == 0)
             {
                 LancElem<T> uj = new LancElem<T>(ertek, fej);
@@ -173,14 +152,14 @@ namespace OE.ALGA.Adatszerkezetek
             }
             else
             {
-                p = fej;
-                int i = 2;
-                while (p.kov != null && i < index) 
+                LancElem<T> p = fej;
+                int i = 1;
+                while (p.kov != null && i < index)
                 {
                     p = p.kov;
                     i++;
                 }
-                if(i <= index)
+                if (i <= index)
                 {
                     LancElem<T> uj = new LancElem<T>(ertek, p.kov);
                     p.kov = uj;
@@ -190,23 +169,19 @@ namespace OE.ALGA.Adatszerkezetek
                     throw new HibasIndexKivetel();
                 }
             }
-           
-            
         }
-
-        
 
         public void Hozzafuz(T ertek)
         {
             LancElem<T> uj = new LancElem<T>(ertek, null);
-            if(fej == null)
+            if (fej == null)
             {
                 fej = uj;
             }
             else
             {
-                p = fej;
-                while(p.kov != null)
+                LancElem<T> p = fej;
+                while (p.kov != null)
                 {
                     p = p.kov;
                 }
@@ -216,14 +191,14 @@ namespace OE.ALGA.Adatszerkezetek
 
         public T Kiolvas(int index)
         {
-            p = fej;
-            int i = 1;
-            while(p != null && i < index)
+            LancElem<T> p = fej;
+            int i = 0;
+            while (i < index && p != null)
             {
                 p = p.kov;
                 i++;
             }
-            if(p != null)
+            if (p != null)
             {
                 return p.tart;
             }
@@ -235,16 +210,16 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Modosit(int index, T ertek)
         {
-            p = fej;
-            int i = 1;
-            while (p != null && i < index)
+            LancElem<T> p = fej;
+            int i = 0;
+            while (i < index && p != null)
             {
                 p = p.kov;
                 i++;
             }
             if (p != null)
             {
-                 p.tart = ertek;
+                p.tart = ertek;
             }
             else
             {
@@ -254,19 +229,18 @@ namespace OE.ALGA.Adatszerkezetek
 
         public void Torol(T ertek)
         {
-            p = fej;
-            e = null;
-
+            LancElem<T> p = fej;
+            LancElem<T> e = null;
             do
             {
-                while (p != null && !EqualityComparer<T>.Default.Equals(p.tart, ertek))
+                while (p != null && !p.tart.Equals(ertek))
                 {
                     e = p;
                     p = p.kov;
                 }
-                if(p != null)
+                if (p != null)
                 {
-                    q = p.kov;
+                    LancElem<T> q = p.kov;
                     if (e == null)
                     {
                         fej = q;
@@ -277,58 +251,67 @@ namespace OE.ALGA.Adatszerkezetek
                     }
                     p = q;
                 }
-                
-            }
-            while (p != null);
-  
-        }
 
+            } while (p != null);
+
+        }
+        public IEnumerator<T> GetEnumerator()
+        {
+            LancoltListaBejaro<T> bejaro = new LancoltListaBejaro<T>(this.fej);
+            return bejaro;
+        }
         IEnumerator IEnumerable.GetEnumerator()
         {
             throw new NotImplementedException();
         }
-        public IEnumerator<T> GetEnumerator()
-        {
-            var current = fej;
-            while (current != null)
-            {
-                yield return current.tart;  
-                current = current.kov;      
-            }
-        }
     }
-
     public class LancoltListaBejaro<T> : IEnumerator<T>
     {
-
-        private LancElem<T> currentElem;
-        private LancElem<T> fej;
-        public T Current => currentElem.tart;
+        public LancElem<T>? fej;
+        public LancElem<T> aktualisElem;
+        public LancoltListaBejaro(LancElem<T> fej)
+        {
+            this.fej = fej;
+            aktualisElem = null;
+        }
+        public T Current
+        {
+            get
+            {
+                if (aktualisElem == null)
+                {
+                    throw new InvalidOperationException();
+                }
+                return aktualisElem.tart;
+            }
+        }
 
         object IEnumerator.Current => throw new NotImplementedException();
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         public bool MoveNext()
         {
-            if (currentElem == null)
+            if (aktualisElem == null)
             {
-                currentElem = fej; 
+                aktualisElem = fej;
+            }
+            else if (aktualisElem.kov != null)
+            {
+                aktualisElem = aktualisElem.kov;
             }
             else
             {
-                currentElem = currentElem.kov; 
+                return false;
             }
-
-            return currentElem != null; 
+            return aktualisElem != null;
         }
 
         public void Reset()
         {
-            currentElem = null;
+            aktualisElem = fej;
         }
     }
 }
