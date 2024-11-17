@@ -6,224 +6,130 @@ using System.Threading.Tasks;
 
 namespace OE.ALGA.Optimalizalas
 {
-   public class HatizsakProblemak
+    public class HatizsakProblema
     {
-        internal int n { get; }
+        public int n { get; }
         public int Wmax { get; }
         public int[] w { get; }
-        public int[] p { get; }
-
-        public HatizsakProblemak(int n, int wmax, int[] weights, int[] values)
+        public float[] p { get; }
+        public HatizsakProblema(int n, int Wmax, int[] w, float[] p)
         {
-            n =this.n;
-            Wmax = wmax;
-            w = new int[n];
-            for (int i = 0; i < n; i++)
+            if (n < 1)
             {
-                w[i] = weights[i];
+                throw new Exception();
             }
-
-            p = new int[n];
-            for (int i = 0; i < n; i++)
+            if (Wmax < 1)
             {
-                p[i] = values[i];
+                throw new Exception();
             }
+            this.n = n;
+            this.Wmax = Wmax;
+            this.w = w;
+            this.p = p;
         }
-
-        public int OsszSuly(bool[] X)
+        public int OsszSuly(bool[] pakolas)
         {
-            int s = 0;
-
-            for (int i = 0; i < n; i++)
+            int sum = 0;
+            for (int i = 0; i < pakolas.Length; i++)
             {
-                if (X[i] == true)
+                if (pakolas[i])
                 {
-                    s = s + w[i];
+                    sum += w[i];
                 }
             }
-
-            return s;
+            return sum;
         }
-
-        public int OsszErtek(bool[] X)
+        public float OsszErtek(bool[] pakolas)
         {
-            int s = 0;
-
-            for (int i = 0; i < n; i++)
+            float sum = 0;
+            for (int i = 0; i < pakolas.Length; i++)
             {
-                if (X[i] == true)
+                if (pakolas[i])
                 {
-                    s = s + p[i];
+                    sum += p[i];
                 }
             }
-
-            return s;
+            return sum;
         }
-
-        public bool Ervenyes(bool[] n)
+        public bool Ervenyes(bool[] pakolas)
         {
-            int totalWeight = OsszSuly(n);
-
-            if (totalWeight <= Wmax)
+            if (OsszSuly(pakolas) <= Wmax)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-
     }
-
     public class NyersEro<T>
     {
-        public int m;
-        private Func<int, T> generator;
-        private Func<T, double> josag;
-        private int lepesszam;
-        public int LépésSzám => lepesszam;
-
-        public NyersEro(int m, Func<int, T> generator, Func<T, double> josag)
+        int m;
+        Func<int, T> generator;
+        Func<T, float> josag;
+        public int LepesSzam { get; private set; }
+        public NyersEro(int m, Func<int, T> generator, Func<T, float> josag)
         {
-
             this.m = m;
             this.generator = generator;
             this.josag = josag;
-            this.lepesszam = 0;
-
         }
-
-        public bool[] Generator(int index)
+        public T OptimalisMegoldas()
         {
-
-            int n = 0;
-            int szám = index - 1; 
-            bool[] K = new bool[n]; 
-
-            for (int j = 0; j < n; j++) 
+            T o = generator(1);
+            for (int i = 1; i < m; i++)
             {
-                K[j] = (szám / Math.Pow(2, j - 1) % 2 == 1); 
-            }
-
-            return K; 
-        }
-
-        public double Josag(bool[] megoldas)
-        {
-            double osszErtek = 0;  
-            double osszSuly = 0;   
-
-            
-            for (int i = 0; i < megoldas.Length; i++)
-            {
-                if (megoldas[i]) 
+                T x = generator(i);
+                LepesSzam++;
+                if (josag(x) > josag(o))
                 {
-                    // osszErtek += p[i];  
-                    // osszSuly += w[i];   
-                }
-            }
-
-            
-            return osszErtek; 
-        }
-
-        public T OptimálisMegoldás()
-        {
-
-            bool[] o = Generator(1);
-
-            for (int i = 2; i < m; i++)
-            {
-                
-                bool[] x = Generator(i);
-
-                
-                if (Josag(x) > Josag(o))
-                {
-                    
                     o = x;
                 }
-                
             }
-
-
-            
-            //return o;
+            return o;
         }
-    }
 
+    }
     public class NyersEroHatizsakPakolas
     {
-        private int lepesszam;
-        public int LépésSzám => lepesszam;
-        private HatizsakProblemak hátizsákProbléma;
-        public bool[] OptimalisPakolas { get; private set; }
-        public double OptimalisErtek { get; private set; }
-
-        public NyersEroHatizsakPakolas(HatizsakProblemak hátizsákProbléma)
+        HatizsakProblema problema;
+        float optimalisertek;
+        public int LepesSzam { get; private set; }
+        public NyersEroHatizsakPakolas(HatizsakProblema problema)
         {
-            this.hátizsákProbléma = hátizsákProbléma;
-
-
+            this.problema = problema;
         }
-        public bool[] Generator(int index)
+        public bool[] Generator(int i)
         {
-
-            int n = 0;
-            int szám = index - 1;
-            bool[] K = new bool[n];
-
-            for (int j = 0; j < n; j++)
+            bool[] K = new bool[problema.n];
+            int szam = i - 1;
+            for (int j = 0; j < problema.n; j++)
             {
-                K[j] = (szám / Math.Pow(2, j - 1) % 2 == 1);
+                K[j] = ((szam / (int)Math.Pow(2, j)) % 2) == 1;
             }
-
             return K;
-
-
         }
-
-        public double Josag(bool[] megoldas)
+        public float Josag(bool[] pakolas)
         {
-            double osszErtek = 0;
-            double osszSuly = 0;
-
-
-            for (int i = 0; i < megoldas.Length; i++)
+            if (!problema.Ervenyes(pakolas))
             {
-                if (megoldas[i])
-                {
-                    // osszErtek += p[i];  
-                    // osszSuly += w[i];   
-                }
+                return -1;
             }
-
-
-            return osszErtek;
+            return problema.OsszErtek(pakolas);
         }
-
-        public bool[] OptimálisMegoldás()
+        public bool[] OptimalisMegoldas()
         {
-            // i. Hozz létre egy új NyersErő objektumot
-            NyersEro<bool[]> nyersErő = new NyersEro<bool[]>(
-                (int)Math.Pow(2, hátizsákProbléma.n), // 2^n lehetséges megoldás
-                Generator, // Generátor függvény
-                Josag // Jóság függvény
-            );
-
-            // ii. Hívd meg az OptimálisMegoldás metódusát
-            OptimalisPakolas = nyersErő.OptimálisMegoldás();
-
-            // iii. A lépésszám tárolása
-            lepesszam = nyersErő.LépésSzám;
-
-            OptimalisErtek = Josag(OptimalisPakolas);
-
-            // iv. Visszaadja az optimális pakolást
-            return OptimalisPakolas;
+            NyersEro<bool[]> o = new NyersEro<bool[]>((int)Math.Pow(2, problema.n), generator: Generator, josag: Josag);
+            bool[] optimalispakolas = o.OptimalisMegoldas();
+            LepesSzam = o.LepesSzam;
+            optimalisertek = problema.OsszErtek(optimalispakolas);
+            return optimalispakolas;
         }
-
-
+        public float OptimalisErtek()
+        {
+            if (optimalisertek == 0)
+            {
+                OptimalisMegoldas();
+            }
+            return optimalisertek;
+        }
     }
 }
