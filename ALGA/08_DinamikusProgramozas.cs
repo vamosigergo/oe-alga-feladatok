@@ -1,47 +1,38 @@
-﻿using System;
+﻿using OE.ALGA.Optimalizalas;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace OE.ALGA.Optimalizalas
 {
-    public class DinamikusHátizsákPakolas
+    public class DinamikusHatizsakPakolas
     {
-        HatizsakProblemak problema;
-        public int Lepesszam { get; private set; }
-
-        public DinamikusHátizsákPakolas(HatizsakProblemak problema)
+        HatizsakProblema problema;
+        public int LepesSzam { get; }
+        public DinamikusHatizsakPakolas(HatizsakProblema problema)
         {
             this.problema = problema;
-            Lepesszam = 0;
         }
-
-        public int TablazatFeltoltes()
+        public float[,] TablazatFeltoltes()
         {
-            int n = problema.n;
-            int W = problema.Wmax;
-            int[,] F = new int[n + 1, W + 1];
-
-            for (int t = 0; t < n; t++)
+            float[,] F = new float[problema.n + 1, problema.Wmax + 1];
+            for (int t = 0; t < problema.n + 1; t++)
             {
                 F[t, 0] = 0;
             }
-            for (int h = 0; h < W; h++)
+            for (int h = 0; h < problema.Wmax + 1; h++)
             {
                 F[0, h] = 0;
             }
-            for (int t = 0; t < n; t++)
+            for (int t = 1; t < problema.n + 1; t++)
             {
-                for (int h = 0; h < W; h++)
+                for (int h = 1; h < problema.Wmax + 1; h++)
                 {
-                    int wt = problema.w[t - 1];
-                    int pt = problema.p[t-1];
-
-                    if (h >= wt)
+                    if (h >= problema.w[t - 1])
                     {
-                        F[t, h] = Math.Max(F[t - 1, h], F[t - 1, h - wt] + pt);
+                        F[t, h] = Math.Max(F[t - 1, h], F[t - 1, h - problema.w[t - 1]] + problema.p[t - 1]);
                     }
                     else
                     {
@@ -49,37 +40,36 @@ namespace OE.ALGA.Optimalizalas
                     }
                 }
             }
-
-            return F[n, W];
+            return F;
         }
-
-        public int OptimalisErtek()
+        public float OptimalisErtek()
         {
-            return TablazatFeltoltes();
+            float[,] F = TablazatFeltoltes();
+            return F[problema.n, problema.Wmax];
         }
-
-        public bool[] OptimalisMegoldas(int[,] F)
+        public bool[] OptimalisMegoldas()
         {
-            int n = problema.n;
-            int Wmax = problema.Wmax;
-
-            bool[] O = new bool[n];
-
-            int t = n;
-            int h = Wmax;
-
-            while (t > 0 && h > 0)
+            float[,] F = TablazatFeltoltes();
+            bool[] O = new bool[problema.n];
+            int h = problema.Wmax;
+            for (int t = problema.n; t > 0; t--)
             {
-                
                 if (F[t, h] != F[t - 1, h])
                 {
-                    O[t] = true;
-                    h = h - Wmax;
+                    O[t - 1] = true;
+                    h -= problema.w[t - 1];
                 }
-                t--; 
+                else
+                {
+                    O[t - 1] = false;
+                }
             }
 
-            return O; 
+            return O;
+
+
+
+
         }
     }
 }
